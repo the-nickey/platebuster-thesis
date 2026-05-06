@@ -34,7 +34,7 @@ from inference import (
 # Полная версия со всеми шестью моделями и режимом сравнения — в основной
 # папке репозитория (`streamlit_app/`). Когда у проекта будет публичный URL,
 # подменим эту константу на ссылку.
-REPO_LINK_PLACEHOLDER = "ссылка появится после публикации репозитория"
+REPO_LINK_PLACEHOLDER = "https://github.com/the-nickey/platebuster-thesis/"
 
 _DARK_THEME_CSS = """
 <style>
