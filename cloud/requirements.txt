@@ -1,0 +1,12 @@
+# pip-зависимости для training_bundle на Yandex Cloud A100 VM.
+# Образ "Ubuntu 22.04 + Deep Learning Toolkit" уже содержит torch+CUDA, не трогаем версию torch.
+
+ultralytics>=8.4.0
+# rfdetr БЕЗ extras [train,loggers] не содержит train-loop — model.train() падает с ImportError.
+# Источник: src/rfdetr/detr.py в roboflow/rf-detr (extras pulls in pytorch_lightning, pycocotools, auto_batch).
+rfdetr[train,loggers]>=1.6.5
+pycocotools>=2.0.7
+opencv-python>=4.10.0
+Pillow>=10.0.0
+numpy>=1.26.0
+supervision>=0.22.0

@@ -1,0 +1,12 @@
+# Streamlit Community Cloud (Python 3.11+) - pinned под наш inference
+# Если CPU-only deploy: torch CPU-wheel ставится автоматически из PyPI
+streamlit>=1.30,<2.0
+ultralytics==8.4.46
+torch==2.5.1
+torchvision==0.20.1
+opencv-python-headless>=4.8,<5.0
+pillow>=10.0,<11.0
+numpy>=1.24,<3.0
+# rfdetr тянет за собой transformers, peft, accelerate, supervision — ~500 MB.
+# Если деплоишь CPU-only бесплатным тарифом и RF-DETR не нужен — закомменти.
+rfdetr>=1.6,<2.0

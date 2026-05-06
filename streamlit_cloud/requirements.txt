@@ -1,0 +1,15 @@
+# Зависимости для Streamlit Community Cloud.
+# Streamlit Community Cloud собирает на Linux x86_64 + Python 3.11,
+# поэтому даём CPU-wheel'ы Torch напрямую — без этого pip потянет
+# CUDA-сборку (~750 МБ), и приложение не влезет в free-tier.
+
+streamlit==1.42.0
+
+torch @ https://download.pytorch.org/whl/cpu/torch-2.5.1%2Bcpu-cp311-cp311-linux_x86_64.whl
+torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.20.1%2Bcpu-cp311-cp311-linux_x86_64.whl
+
+ultralytics>=8.3,<8.5
+
+opencv-python-headless>=4.8,<5
+Pillow>=10,<12
+numpy>=1.24,<2

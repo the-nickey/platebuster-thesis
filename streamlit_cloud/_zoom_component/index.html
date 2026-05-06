@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<title>platebuster zoom</title>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+  #wrap {
+    width: 100%;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+    user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    line-height: 0; /* убираем «фантомные» 4px под img */
+  }
+  #img {
+    display: block;
+    width: 100%;
+    height: auto;
+    cursor: zoom-in;
+    transition: transform 0.15s ease-out;
+    transform-origin: 50% 50%;
+    -webkit-user-drag: none; user-drag: none;
+  }
+</style>
+</head>
+<body>
+  <div id="wrap"><img id="img" alt="" draggable="false"/></div>
+
+<script>
+  // ---- мост со Streamlit (минимально-достаточный, без npm-build) ----
+  function send(type, data) {
+    window.parent.postMessage(
+      Object.assign({ isStreamlitMessage: true, type: type }, data || {}),
+      "*"
+    );
+  }
+  function ready() { send("streamlit:componentReady", { apiVersion: 1 }); }
+  function setHeight(h) { send("streamlit:setFrameHeight", { height: h }); }
+
+  const img  = document.getElementById("img");
+  const wrap = document.getElementById("wrap");
+  let zoom   = 5.0;
+  let active = false;
+
+  function reportHeight() {
+    // фактическая высота отрисованной картинки + бордер-радиус слот
+    const h = Math.ceil(wrap.getBoundingClientRect().height);
+    if (h > 0) setHeight(h);
+  }
+  // постоянное наблюдение: при изменении ширины iframe картинка перерисуется,
+  // и высота должна следовать за ней. ResizeObserver — самый надёжный путь.
+  const ro = new ResizeObserver(reportHeight);
+  ro.observe(wrap);
+  window.addEventListener("resize", reportHeight);
+  img.addEventListener("load", reportHeight);
+
+  // ---- зум по нажатию ----
+  function setOrigin(cx, cy) {
+    const r = img.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, (cx - r.left) / r.width * 100));
+    const y = Math.max(0, Math.min(100, (cy - r.top)  / r.height * 100));
+    img.style.transformOrigin = x + "% " + y + "%";
+  }
+  function zoomIn(cx, cy) {
+    active = true;
+    setOrigin(cx, cy);
+    img.style.transform = "scale(" + zoom + ")";
+    img.style.cursor = "zoom-out";
+  }
+  function zoomOut() {
+    active = false;
+    img.style.transform = "scale(1)";
+    img.style.cursor = "zoom-in";
+  }
+  img.addEventListener("mousedown",  e => { e.preventDefault(); zoomIn(e.clientX, e.clientY); });
+  img.addEventListener("mouseup",    zoomOut);
+  img.addEventListener("mouseleave", zoomOut);
+  img.addEventListener("mousemove",  e => { if (active) setOrigin(e.clientX, e.clientY); });
+  img.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    zoomIn(t.clientX, t.clientY);
+  }, { passive: false });
+  img.addEventListener("touchmove",  e => {
+    if (e.touches.length !== 1 || !active) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    setOrigin(t.clientX, t.clientY);
+  }, { passive: false });
+  img.addEventListener("touchend",    zoomOut);
+  img.addEventListener("touchcancel", zoomOut);
+  img.addEventListener("contextmenu", e => e.preventDefault());
+
+  // ---- получение данных из Python ----
+  function onMessage(event) {
+    if (!event.data || event.data.type !== "streamlit:render") return;
+    const args = (event.data.args) || {};
+    if (typeof args.zoom === "number" && args.zoom > 1) zoom = args.zoom;
+    if (typeof args.src === "string" && args.src) {
+      // присваиваем только если изменилось — чтобы не перезагружать одно и то же
+      if (img.src !== args.src) img.src = args.src;
+      else reportHeight();
+    }
+  }
+  window.addEventListener("message", onMessage);
+  ready();
+</script>
+</body>
+</html>

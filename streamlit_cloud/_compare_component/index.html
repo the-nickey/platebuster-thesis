@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<title>platebuster compare</title>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+  #wrap {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+    user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    line-height: 0;
+    cursor: ew-resize;
+  }
+  #img-before {
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none; user-drag: none;
+  }
+  #img-after {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    clip-path: inset(0 0 0 50%);
+    pointer-events: none;
+    -webkit-user-drag: none; user-drag: none;
+  }
+  #handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+  #knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #ffffff;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    color: #131313;
+    font-size: 14px; font-weight: 700;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .label {
+    position: absolute;
+    top: 8px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    pointer-events: none;
+  }
+  .label-before { left: 8px; }
+  .label-after  { right: 8px; }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <img id="img-before" alt=""/>
+    <img id="img-after"  alt=""/>
+    <div id="handle"></div>
+    <div id="knob">⇆</div>
+    <div class="label label-before" id="lab-before">до</div>
+    <div class="label label-after"  id="lab-after">после</div>
+  </div>
+
+<script>
+  function send(type, data) {
+    window.parent.postMessage(
+      Object.assign({ isStreamlitMessage: true, type: type }, data || {}),
+      "*"
+    );
+  }
+  function ready()         { send("streamlit:componentReady", { apiVersion: 1 }); }
+  function setHeight(h)    { send("streamlit:setFrameHeight", { height: h }); }
+
+  const wrap   = document.getElementById("wrap");
+  const before = document.getElementById("img-before");
+  const after  = document.getElementById("img-after");
+  const handle = document.getElementById("handle");
+  const knob   = document.getElementById("knob");
+  const labBefore = document.getElementById("lab-before");
+  const labAfter  = document.getElementById("lab-after");
+
+  let pos = 50;
+  function setPos(p) {
+    pos = Math.max(0, Math.min(100, p));
+    after.style.clipPath = "inset(0 0 0 " + pos + "%)";
+    handle.style.left = pos + "%";
+    knob.style.left = pos + "%";
+  }
+  setPos(50);
+
+  function reportHeight() {
+    const h = Math.ceil(wrap.getBoundingClientRect().height);
+    if (h > 0) setHeight(h);
+  }
+  const ro = new ResizeObserver(reportHeight);
+  ro.observe(wrap);
+  window.addEventListener("resize", reportHeight);
+  before.addEventListener("load", reportHeight);
+
+  // ---- drag ----
+  let dragging = false;
+  function startDrag(e) { dragging = true; moveDrag(e); }
+  function stopDrag()   { dragging = false; }
+  function moveDrag(e) {
+    if (!dragging) return;
+    const r = wrap.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    setPos((cx - r.left) / r.width * 100);
+  }
+  wrap.addEventListener("mousedown",  e => { e.preventDefault(); startDrag(e); });
+  window.addEventListener("mouseup",  stopDrag);
+  window.addEventListener("mouseleave", stopDrag);
+  window.addEventListener("mousemove", moveDrag);
+  wrap.addEventListener("touchstart", e => { e.preventDefault(); startDrag(e); }, { passive: false });
+  window.addEventListener("touchend",   stopDrag);
+  window.addEventListener("touchcancel", stopDrag);
+  window.addEventListener("touchmove",  e => { if (dragging) e.preventDefault(); moveDrag(e); }, { passive: false });
+  wrap.addEventListener("contextmenu", e => e.preventDefault());
+
+  // ---- получение данных ----
+  function onMessage(event) {
+    if (!event.data || event.data.type !== "streamlit:render") return;
+    const a = event.data.args || {};
+    if (typeof a.label_before === "string") labBefore.textContent = a.label_before;
+    if (typeof a.label_after  === "string") labAfter.textContent  = a.label_after;
+    if (typeof a.src_before === "string" && a.src_before
+        && before.src !== a.src_before) {
+      before.src = a.src_before;
+    }
+    if (typeof a.src_after === "string" && a.src_after
+        && after.src !== a.src_after) {
+      after.src = a.src_after;
+    }
+  }
+  window.addEventListener("message", onMessage);
+  ready();
+</script>
+</body>
+</html>

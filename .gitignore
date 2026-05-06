@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Datasets — never commit large files
+data/ccpd/**
+data/ccpd2020/**
+data/openalpr/**
+data/openalpr_raw/**
+data/roboflow/**
+data/processed/**
+data/manual/**
+
+# Allow .gitkeep + README markers inside data/*
+!data/**/.gitkeep
+!data/**/README.md
+
+# Model weights — track via HF Hub or external storage
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+weights/**
+!weights/.gitkeep
+!weights/README.md
+
+# Training output
+runs/
+runs_from_cloud/
+qc_output/
+
+# Cloud training bundles (rebuildable)
+cloud/training_bundle_*.tar.gz
+cloud/bundle/
+
+# CVAT data volume
+infra/cvat/cvat_data/
+infra/cvat/.cvat-data/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Logs
+*.log
+logs/
+
+# Local environment
+.env
+.env.local

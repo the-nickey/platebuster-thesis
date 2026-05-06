@@ -1,0 +1,16 @@
+# Тема в духе «инфостиля»: светлый фон, тёмный текст, без декоративности.
+
+[theme]
+base = "light"
+primaryColor = "#222222"
+textColor = "#1B1B1B"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F4F4"
+font = "sans serif"
+
+[server]
+maxUploadSize = 50  # МБ на файл — фотографии iPhone до ~30 МБ влезут с запасом
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
