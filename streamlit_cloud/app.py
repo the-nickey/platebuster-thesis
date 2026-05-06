@@ -1080,7 +1080,7 @@ def main() -> None:
         page_title="platebuster",
         page_icon=None,
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
 
     init_state()
