@@ -656,12 +656,15 @@ def render_sidebar() -> Settings:
             ),
         )
 
+        # Привязываем виджет к session_state через `key=` — иначе при долгом
+        # rerun (рендер карточек с iframe-компонентами) Streamlit-виджет и
+        # session_state могут разойтись, и первый клик «теряется». При
+        # явном key Streamlit держит их синхронизированными.
         dark_theme = st.toggle(
             "Тёмная тема",
-            value=st.session_state.get("dark_theme", False),
+            key="dark_theme",
             help="Чёрный фон вместо белого — приятнее вечером.",
         )
-        st.session_state["dark_theme"] = dark_theme
 
         debug = st.toggle(
             "Режим отладки", value=False,
