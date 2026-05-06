@@ -12,4 +12,5 @@ ultralytics>=8.3,<8.5
 
 opencv-python-headless>=4.8,<5
 Pillow>=10,<12
+pillow-heif>=0.18,<2
 numpy>=1.24,<2

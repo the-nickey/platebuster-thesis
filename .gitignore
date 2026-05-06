@@ -38,6 +38,9 @@ data/manual/**
 weights/**
 !weights/.gitkeep
 !weights/README.md
+# Кроме одного веса, нужного для облачной демо-сборки.
+# Файл всего 5,4 МБ — помещается в GitHub без LFS.
+!streamlit_cloud/models/yolo11n-pose-v2.pt
 
 # Training output
 runs/

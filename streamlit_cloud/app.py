@@ -21,6 +21,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import ExifTags, Image, ImageOps
 
+# Поддержка HEIC/HEIF, формата фото с iPhone. После регистрации
+# `pillow_heif` Pillow читает их как обычные форматы — никакой
+# дополнительной конвертации в коде не нужно. Если по какой-то
+# причине пакет не установлен (локальная сборка без iOS-теста),
+# просто игнорируем — Streamlit отфильтрует расширение.
+try:
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+except ImportError:
+    pass
+
 from inference import (
     Detection,
     SinglePosePipeline,
@@ -34,7 +45,110 @@ from inference import (
 # Полная версия со всеми шестью моделями и режимом сравнения — в основной
 # папке репозитория (`streamlit_app/`). Когда у проекта будет публичный URL,
 # подменим эту константу на ссылку.
-REPO_LINK_PLACEHOLDER = "https://github.com/the-nickey/platebuster-thesis/"
+REPO_LINK_PLACEHOLDER = "ссылка появится после публикации репозитория"
+
+# Force-light CSS: Streamlit на клиенте по умолчанию читает системную
+# `prefers-color-scheme`, и при системной тёмной перебивает наш
+# `theme.base = light` из config.toml. Этот блок применяется, когда
+# тумблер «Тёмная тема» в сайдбаре выключен, и принудительно красит
+# поверхности в белый — тогда не важно, что видит браузер по системе.
+_LIGHT_THEME_CSS = """
+<style>
+:root { color-scheme: light; }
+.stApp, [data-testid="stMain"], [data-testid="stHeader"]
+{ background-color: #FFFFFF !important; color: #1B1B1B !important; }
+[data-testid="stSidebar"]
+{ background-color: #F4F4F4 !important; }
+[data-testid="stSidebar"] *,
+[data-testid="stMain"] *
+{ color: #1B1B1B; }
+.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp p,
+.stApp label, .stApp .stMarkdown, .stApp .stMarkdown p
+{ color: #1B1B1B !important; }
+.stApp .stCaption, .stApp [data-testid="stCaptionContainer"]
+{ color: #666666 !important; }
+hr { border-color: #ECECEC !important; }
+
+/* шапка Streamlit и кнопка-бургер «>>» / «<<» */
+[data-testid="stHeader"] svg,
+[data-testid="stSidebarCollapseButton"] svg,
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stBaseButton-header"] svg,
+[data-testid="stBaseButton-headerNoPadding"] svg
+{ color: #1B1B1B !important; fill: #1B1B1B !important; }
+
+/* file_uploader */
+[data-testid="stFileUploader"] section,
+[data-testid="stFileUploaderDropzone"]
+{ background-color: #FAFAFA !important; border-color: #DDDDDD !important; }
+[data-testid="stFileUploader"] *,
+[data-testid="stFileUploaderFile"] *,
+[data-testid="stFileUploaderFileName"]
+{ color: #1B1B1B !important; }
+[data-testid="stFileUploaderFile"]
+{ background-color: #F4F4F4 !important;
+  border: 1px solid #DDDDDD !important; }
+[data-testid="stFileUploader"] small
+{ color: #666666 !important; }
+[data-testid="stFileUploaderDeleteBtn"] svg
+{ color: #1B1B1B !important; fill: #1B1B1B !important; }
+
+/* кнопки */
+button, .stDownloadButton button, .stButton button
+{ background-color: #FFFFFF !important; color: #1B1B1B !important;
+  border: 1px solid #DDDDDD !important; }
+button p, button span, button div
+{ color: inherit !important; }
+button:hover, .stDownloadButton button:hover, .stButton button:hover
+{ background-color: #F4F4F4 !important; border-color: #BBBBBB !important; }
+button[kind="primary"], .stDownloadButton button[kind="primary"]
+{ background-color: #1B1B1B !important; color: #FFFFFF !important;
+  border: 1px solid #1B1B1B !important; }
+button[kind="primary"] p, button[kind="primary"] span,
+button[kind="primary"] div
+{ color: #FFFFFF !important; }
+button[data-testid="stBaseButton-tertiary"]
+{ background-color: transparent !important;
+  color: #444444 !important; border: none !important; }
+
+/* радио / чекбоксы / тумблеры */
+[data-testid="stRadio"] label, [data-testid="stCheckbox"] label
+{ color: #1B1B1B !important; }
+[data-testid="stCheckbox"] label[data-baseweb="checkbox"] > div:first-child
+{ background-color: #DDDDDD !important; border: 1px solid #BBBBBB !important; }
+[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input[aria-checked="true"]) > div:first-child
+{ background-color: #1B1B1B !important; border-color: #1B1B1B !important; }
+[data-testid="stCheckbox"] label[data-baseweb="checkbox"] > div:first-child > div
+{ background-color: #FFFFFF !important; }
+[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input[aria-checked="true"]) > div:first-child > div
+{ background-color: #FFFFFF !important; }
+
+/* иконки тултипа `?` */
+[data-testid="stTooltipHoverTarget"],
+[data-testid="stTooltipHoverTarget"] svg,
+.stTooltipIcon, .stTooltipIcon svg
+{ color: #888888 !important; fill: #888888 !important; }
+
+/* алерты */
+[data-testid="stAlert"],
+[data-testid="stAlertContainer"],
+div[role="alert"]
+{ background-color: #EAF1FB !important; color: #1B1B1B !important;
+  border: 1px solid #C8D9F0 !important; }
+[data-testid="stAlert"] *, div[role="alert"] *
+{ color: #1B1B1B !important; }
+
+/* модалка «Что это?» */
+div[role="dialog"]
+{ background-color: #FFFFFF !important; color: #1B1B1B !important; }
+div[role="dialog"] *
+{ color: #1B1B1B !important; }
+
+/* плашка-лейбл аплоадера */
+.pb-upload-label, .pb-upload-label *
+{ color: #1B1B1B !important; }
+</style>
+"""
 
 _DARK_THEME_CSS = """
 <style>
@@ -174,7 +288,8 @@ ABOUT_TEXT = (
     "5,4 мегабайта, время обработки одной фотографии на сервере — около "
     "50 миллисекунд.\n\n"
     f"Полная версия со всеми шестью моделями и режимом сравнения — "
-    f"в репозитории ({REPO_LINK_PLACEHOLDER})."
+    f"в репозитории ({REPO_LINK_PLACEHOLDER}).\n\n"
+    "Этот сервис сделал П. В. Очкин в рамках магистерской работы — УрФУ, 2026."
 )
 
 
@@ -1014,11 +1129,15 @@ def main() -> None:
 
     settings = render_sidebar()
 
-    # Тёмная тема накатывается отдельным CSS-блоком — только если включена.
-    # Стримлит-нативной runtime-переключалки нет, поэтому переопределяем
-    # ключевые поверхности руками: фоны, текст, рамки, плашки виджетов.
+    # Тема накатывается отдельным CSS-блоком: либо force-light, либо
+    # force-dark. Streamlit на клиенте по умолчанию читает системную
+    # `prefers-color-scheme`, и при системной тёмной перебивает наш
+    # `theme.base = light` из config.toml. Чтобы свет был светом, а тьма —
+    # тьмой ровно тогда, когда это выбрал пользователь, форсим явно.
     if settings.dark_theme:
         st.markdown(_DARK_THEME_CSS, unsafe_allow_html=True)
+    else:
+        st.markdown(_LIGHT_THEME_CSS, unsafe_allow_html=True)
 
     # Закрытие сайдбара по клику снаружи (только при узком viewport, где
     # сайдбар оверлеит контент). Streamlit-нативного поведения нет; ставим
@@ -1063,14 +1182,14 @@ def main() -> None:
         "}"
         "</style>"
         "<div class='pb-upload-label'>"
-        f"<span class='pb-desktop'>Перетащите или выберите фотографии — до {MAX_PHOTOS} штук</span>"
-        f"<span class='pb-mobile'>Выберите фотографии — до {MAX_PHOTOS} штук</span>"
+        f"<span class='pb-desktop'>Перетащите или выберите фотографии — до {MAX_PHOTOS} штук (JPG, PNG, HEIC)</span>"
+        f"<span class='pb-mobile'>Выберите фотографии — до {MAX_PHOTOS} штук (JPG, PNG, HEIC)</span>"
         "</div>",
         unsafe_allow_html=True,
     )
     uploaded_files = st.file_uploader(
         " ",
-        type=["jpg", "jpeg", "png"],
+        type=["jpg", "jpeg", "png", "heic", "heif"],
         accept_multiple_files=True,
         label_visibility="collapsed",
     )
@@ -1078,7 +1197,7 @@ def main() -> None:
     if not uploaded_files:
         st.info(
             "Загрузите фото машин с видимыми номерами. "
-            "JPG или PNG, по одному или сразу несколько."
+            "JPG, PNG или HEIC, по одному или сразу несколько."
         )
         return
 
@@ -1205,7 +1324,7 @@ def main() -> None:
 
     st.markdown("---")
     st.caption(
-        "platebuster — open-source детектор автомобильных номеров. "
+        "Сделал П. В. Очкин, магистерская работа УрФУ ИРИТ-РТФ 2026. "
         f"Архитектура моделей, разбор экспериментов и полная версия "
         f"со всеми шестью моделями — в репозитории "
         f"({REPO_LINK_PLACEHOLDER})."

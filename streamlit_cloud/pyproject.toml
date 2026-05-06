@@ -1,0 +1,11 @@
+# Минимальный pyproject.toml для Streamlit Community Cloud.
+# Главное здесь — `requires-python`: uv использует его при создании
+# venv, чтобы выбрать совместимую версию интерпретатора.
+# Streamlit 1.42 + asyncio в Python 3.14 несовместимы (api сломан),
+# поэтому жёстко требуем 3.11.
+
+[project]
+name = "platebuster-cloud"
+version = "0.1.0"
+description = "platebuster — облачная демо-сборка"
+requires-python = ">=3.11,<3.12"
