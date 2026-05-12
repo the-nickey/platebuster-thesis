@@ -1,7 +1,7 @@
 {
   "_comment": "Относительные пути к артефактам — будут скачаны с tunnel URL пользователя. Запусти `python -m http.server 8080` в корне ~/Desktop/vibecode/thesis/ и cloudflared tunnel — тогда все эти пути будут доступны через `<tunnel_url>/<path>`.",
 
-  "sample_image_ids": "streamlit_cloud_eval/data/sample_image_ids.json",
+  "sample_image_ids": "streamlit_cloud_latency_probe/sample_image_ids.json",
   "test_images_root": "data/processed/unified/test_per_region",
 
   "models": {
