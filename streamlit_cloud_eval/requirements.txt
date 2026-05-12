@@ -8,14 +8,8 @@
 # раскомментируй torch/ultralytics/rfdetr ниже.
 
 streamlit>=1.42
-numpy>=1.26
-pandas>=2.0
+numpy
+pandas
 
-# --- если включаем latency-замер в облаке (опционально) ---
-# torch==2.5.1
-# torchvision==0.20.1
-# --extra-index-url https://download.pytorch.org/whl/cpu
-# ultralytics>=8.4
-# rfdetr>=1.6
-# opencv-python-headless>=4.8
-# pillow>=10
+# Версии numpy/pandas специально не фиксируются: Streamlit Community Cloud
+# берёт свежий Python (3.13–3.14), и pip сам подберёт совместимые wheels.
