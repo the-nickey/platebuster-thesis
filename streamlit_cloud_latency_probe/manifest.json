@@ -1,0 +1,16 @@
+{
+  "_comment": "Относительные пути к артефактам — будут скачаны с tunnel URL пользователя. Запусти `python -m http.server 8080` в корне ~/Desktop/vibecode/thesis/ и cloudflared tunnel — тогда все эти пути будут доступны через `<tunnel_url>/<path>`.",
+
+  "sample_image_ids": "streamlit_cloud_eval/data/sample_image_ids.json",
+  "test_images_root": "data/processed/unified/test_per_region",
+
+  "models": {
+    "yolo11n":      { "type": "yolo_detect", "weights": "runs_from_cloud/runs/yolo11n_cuda_20260504_v2/weights/best.pt", "imgsz": 640 },
+    "yolo12n":      { "type": "yolo_detect", "weights": "runs_from_cloud/runs/yolo12n_cuda_20260504_130347/weights/best.pt", "imgsz": 640 },
+    "yolo11n_pose": { "type": "yolo_pose",   "weights": "runs_from_cloud/runs/yolo11n_pose_cuda_v2/weights/best.pt", "imgsz": 640 },
+    "rfdetr_nano":  { "type": "rfdetr", "rfdetr_class": "RFDETRNano",   "weights": "runs_from_cloud/runs/rfdetr_nano_20260504_155433/checkpoint_best_ema.pth", "resolution": 384 },
+    "rfdetr_medium":{ "type": "rfdetr", "rfdetr_class": "RFDETRMedium", "weights": "runs_from_cloud/runs/rfdetr_medium_20260503_132525/checkpoint_best_ema.pth", "resolution": 576 },
+    "keypoint_head":{ "type": "two_stage", "bbox_weights": "runs_from_cloud/runs/yolo11n_cuda_20260504_v2/weights/best.pt", "weights": "runs_from_cloud/runs/keypoint_head_20260503_131404/best.pt", "crop_size": 192, "crop_padding": 0.25 },
+    "classical":    { "type": "classical" }
+  }
+}

@@ -1,0 +1,16 @@
+# Тяжёлый стек для inference в Streamlit Cloud (1 vCPU, CPU-only torch).
+# CPU-сборка PyTorch указана явно — без этого pip тянет CUDA-сборку
+# объёмом ~750 МБ, и приложение не влезает в 1 ГБ диска.
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+
+streamlit>=1.42
+numpy>=1.26
+pandas>=2.0
+opencv-python-headless>=4.8
+pillow>=10
+requests>=2.31
+ultralytics>=8.4
+rfdetr>=1.6

@@ -1,0 +1,21 @@
+# streamlit_cloud_eval — минимальный стек для бутстрэпа в облаке.
+#
+# Принципиально не тащим torch/ultralytics/rfdetr — инференс заранее посчитан
+# локально и кладётся в data/predictions/. В облаке только пересчёт по
+# сохранённым массивам через numpy.
+#
+# Если решим прогонять latency-замер в облаке (страница "Latency probe"),
+# раскомментируй torch/ultralytics/rfdetr ниже.
+
+streamlit>=1.42
+numpy>=1.26
+pandas>=2.0
+
+# --- если включаем latency-замер в облаке (опционально) ---
+# torch==2.5.1
+# torchvision==0.20.1
+# --extra-index-url https://download.pytorch.org/whl/cpu
+# ultralytics>=8.4
+# rfdetr>=1.6
+# opencv-python-headless>=4.8
+# pillow>=10

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+
+# /tmp-кеш, не должен попадать в репу
+results/
+assets/
